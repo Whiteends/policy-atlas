@@ -42,8 +42,8 @@ $expectations = @{
     'stage-2-complete' = 2
     'stage-3-complete' = 3
     'mostly-unknown' = 0
-    'missing-critical-baseline' = 0
-    'stage-4-manual-gaps' = 3
+    'missing-critical-baseline' = 1
+    'stage-4-manual-gaps' = 4
 }
 foreach ($fixtureName in $expectations.Keys) {
     $fixture = Read-Fixture $fixtureName
@@ -54,7 +54,7 @@ foreach ($fixtureName in $expectations.Keys) {
     Assert-Equal $fixture.assessment.stage $score.stage "$fixtureName stored score matches recomputed score"
 }
 Assert-Equal (Get-CaMaturityScore (Read-Fixture 'mostly-unknown').signals).provisionalStage 0 'Unknown signals do not improve provisional maturity'
-Assert-Equal (Get-CaMaturityScore (Read-Fixture 'stage-4-manual-gaps').signals).stage 3 'Manual Stage 4 gaps prevent confirmed Stage 4'
+Assert-Equal (Get-CaMaturityScore (Read-Fixture 'stage-4-manual-gaps').signals).stage 4 'Weighted score can reach Stage 4 while manual gaps remain visible'
 
 $library = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $root 'ca-policy-library.json') | ConvertFrom-Json
 $definedIds = @((Get-CaStageDefinitions).Values.required | Select-Object -Unique)
@@ -70,6 +70,8 @@ Assert-True (-not (Test-CaSnapshotContract $invalidStatus).Valid) 'Unknown signa
 
 $browserModel = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $root 'assessment-model.json') | ConvertFrom-Json
 Assert-Equal $browserModel.version '1.0.0' 'Shared assessment model is versioned'
+Assert-Equal @($browserModel.weightedScoring.weights.PSObject.Properties).Count 28 'All 28 controls have scoring weights'
+Assert-Equal (@($browserModel.weightedScoring.weights.PSObject.Properties).Value | Measure-Object -Sum).Sum 100 'Control weights total 100 points'
 foreach ($stageKey in @('1','2','3','4')) {
     $powerShellStage = (Get-CaStageDefinitions)[$stageKey]
     $jsonStage = $browserModel.stages.PSObject.Properties[$stageKey].Value
