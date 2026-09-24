@@ -2,6 +2,17 @@ Set-StrictMode -Version Latest
 
 $script:ValidStatuses = @('detected', 'missing', 'not_applicable', 'manual_confirmation', 'unknown', 'error')
 
+function Get-CaAssessmentModel {
+    $path = Join-Path (Split-Path $PSScriptRoot -Parent) 'assessment-model.json'
+    $model = Get-Content -Raw -Encoding UTF8 -LiteralPath $path | ConvertFrom-Json
+    $weights = @($model.weightedScoring.weights.PSObject.Properties)
+    $weightTotal = ($weights.Value | Measure-Object -Sum).Sum
+    if ($weights.Count -ne 28) { throw "Assessment model must define 28 weighted controls; found $($weights.Count)." }
+    if ($weightTotal -ne 100) { throw "Assessment model weights must total 100; found $weightTotal." }
+    if (@($model.weightedScoring.bands).Count -ne 5) { throw 'Assessment model must define five maturity score bands.' }
+    return $model
+}
+
 function New-CaSignalResult {
     [CmdletBinding()]
     param(
@@ -22,8 +33,7 @@ function New-CaSignalResult {
 }
 
 function Get-CaStageDefinitions {
-    $path = Join-Path (Split-Path $PSScriptRoot -Parent) 'assessment-model.json'
-    $model = Get-Content -Raw -Encoding UTF8 -LiteralPath $path | ConvertFrom-Json
+    $model = Get-CaAssessmentModel
     $definitions = [ordered]@{}
     foreach ($property in $model.stages.PSObject.Properties) { $definitions[$property.Name] = $property.Value }
     return $definitions
@@ -34,7 +44,7 @@ function Get-CaMaturityScore {
     param([Parameter(Mandatory)][object]$Signals)
 
     $definitions = Get-CaStageDefinitions
-    $model = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'assessment-model.json') | ConvertFrom-Json
+    $model = Get-CaAssessmentModel
     $stageResults = [ordered]@{}
     $confirmedStage = 0
     $provisionalStage = 0
@@ -141,12 +151,18 @@ function Test-CaSnapshotContract {
     if (-not $Snapshot.tenant.fingerprint) { $errors.Add('tenant.fingerprint is required') }
     if ($Snapshot.assessment.stage -lt 0 -or $Snapshot.assessment.stage -gt 4) { $errors.Add('assessment.stage must be between 0 and 4') }
     if ($Snapshot.assessment.confidence -lt 0 -or $Snapshot.assessment.confidence -gt 1) { $errors.Add('assessment.confidence must be between 0 and 1') }
+    if ($Snapshot.assessment.PSObject.Properties['maturityScore'] -and ($Snapshot.assessment.maturityScore -lt 0 -or $Snapshot.assessment.maturityScore -gt 100)) { $errors.Add('assessment.maturityScore must be between 0 and 100') }
+    if ($Snapshot.assessment.PSObject.Properties['earnedPoints'] -and $Snapshot.assessment.PSObject.Properties['availablePoints'] -and $Snapshot.assessment.earnedPoints -gt $Snapshot.assessment.availablePoints) { $errors.Add('assessment.earnedPoints cannot exceed assessment.availablePoints') }
     foreach ($property in $Snapshot.signals.PSObject.Properties) {
         $signal = $property.Value
         if ([string]$signal.status -notin $script:ValidStatuses) { $errors.Add("$($property.Name): invalid status '$($signal.status)'") }
         if (-not [string]$signal.reason) { $errors.Add("$($property.Name): reason is required") }
         if (-not $signal.PSObject.Properties['evidence']) { $errors.Add("$($property.Name): evidence array is required") }
         if (-not $signal.PSObject.Properties['checkedAt']) { $errors.Add("$($property.Name): checkedAt is required") }
+        else {
+            $checkedAtValue = [datetimeoffset]::MinValue
+            if (-not [datetimeoffset]::TryParse([string]$signal.checkedAt, [ref]$checkedAtValue)) { $errors.Add("$($property.Name): checkedAt must be an ISO-8601 timestamp") }
+        }
     }
     return [pscustomobject]@{ Valid = ($errors.Count -eq 0); Errors = @($errors) }
 }

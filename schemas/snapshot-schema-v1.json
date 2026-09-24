@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ca-posture.example/schemas/snapshot-schema-v1.json",
+  "$id": "https://raw.githubusercontent.com/Whiteends/policy-atlas/main/schemas/snapshot-schema-v1.json",
   "title": "Policy Atlas assessment snapshot",
   "type": "object",
   "additionalProperties": false,
@@ -63,15 +63,16 @@
       }
     },
     "assessment": {
+      "description": "Weighted maturity result plus legacy compatibility fields and per-stage diagnostic details.",
       "type": "object", "additionalProperties": false,
       "required": ["stage", "provisionalStage", "confidence", "confidenceLabel", "stageResults"],
       "properties": {
         "stage": { "type": "integer", "minimum": 0, "maximum": 4 },
         "provisionalStage": { "type": "integer", "minimum": 0, "maximum": 4 },
-        "maturityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "earnedPoints": { "type": "number", "minimum": 0, "maximum": 100 },
-        "availablePoints": { "type": "number", "minimum": 0, "maximum": 100 },
-        "unresolvedPoints": { "type": "number", "minimum": 0, "maximum": 100 },
+        "maturityScore": { "description": "Normalized weighted score out of 100.", "type": "integer", "minimum": 0, "maximum": 100 },
+        "earnedPoints": { "description": "Points earned by detected controls.", "type": "number", "minimum": 0, "maximum": 100 },
+        "availablePoints": { "description": "Applicable points after not-applicable controls are removed.", "type": "number", "minimum": 0, "maximum": 100 },
+        "unresolvedPoints": { "description": "Applicable points held by unknown, errored, or manual-review controls.", "type": "number", "minimum": 0, "maximum": 100 },
         "scoreStage": { "type": "integer", "minimum": 0, "maximum": 4 },
         "criticalCap": { "type": "integer", "minimum": 0, "maximum": 4 },
         "confidence": { "type": "number", "minimum": 0, "maximum": 1 },

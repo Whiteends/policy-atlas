@@ -57,11 +57,17 @@ Assert-Equal (Get-CaMaturityScore (Read-Fixture 'mostly-unknown').signals).provi
 Assert-Equal (Get-CaMaturityScore (Read-Fixture 'stage-4-manual-gaps').signals).stage 4 'Weighted score can reach Stage 4 while manual gaps remain visible'
 
 $library = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $root 'ca-policy-library.json') | ConvertFrom-Json
+Assert-Equal $library.version '1.0.0' 'Policy library is versioned'
+Assert-Equal @($library.policies).Count 28 'Policy library contains 28 controls'
+Assert-Equal @($library.policies.id | Select-Object -Unique).Count 28 'Policy control IDs are unique'
 $definedIds = @((Get-CaStageDefinitions).Values.required | Select-Object -Unique)
 foreach ($id in $definedIds) { Assert-True ($id -in @($library.policies.id)) "Scoring signal exists in policy library: $id" }
 
 $schema = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $root 'schemas\snapshot-schema-v1.json') | ConvertFrom-Json
 Assert-Equal $schema.properties.schemaVersion.const '1.0.0' 'JSON Schema version is fixed at 1.0.0'
+$policySchema = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $root 'schemas\policy-library-schema-v1.json') | ConvertFrom-Json
+Assert-Equal $policySchema.properties.policies.minItems 28 'Policy schema requires all 28 controls'
+Assert-True ($policySchema.'$defs'.policy.required -contains 'why_it_matters') 'Policy schema requires risk rationale'
 $emptyContract = Test-CaSnapshotContract ([pscustomobject]@{})
 Assert-True (-not $emptyContract.Valid) 'Empty snapshot is rejected without throwing'
 $invalidStatus = Read-Fixture 'stage-1-complete'

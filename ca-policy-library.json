@@ -1,4 +1,6 @@
 {
+  "$schema": "./schemas/policy-library-schema-v1.json",
+  "version": "1.0.0",
   "policies": [
     {
       "id": "block-device-code-flow",
