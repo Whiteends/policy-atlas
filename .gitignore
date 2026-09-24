@@ -4,3 +4,18 @@ raw-ca-policies.json
 manual-overrides.reviewed.json
 *.tenant-snapshot.json
 
+# Local credentials and environment settings
+.env
+.env.*
+*.secrets.json
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local diagnostics
+*.log
+results/
