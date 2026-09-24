@@ -1,80 +1,83 @@
 # Policy Atlas
 
-**An evidence-led Conditional Access assessment and rollout planner for Microsoft Entra.**
+**A Conditional Access assessment and rollout planner for Microsoft Entra.**
 
 [![Test](https://github.com/Whiteends/policy-atlas/actions/workflows/test.yml/badge.svg)](https://github.com/Whiteends/policy-atlas/actions/workflows/test.yml)
 [![PowerShell 7](https://img.shields.io/badge/PowerShell-7%2B-2671be)](https://learn.microsoft.com/powershell/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Conditional Access estates rarely fail because nobody created policies. They fail
-because coverage is incomplete, exclusions accumulate, important controls remain in
-report-only mode, or nobody can explain which change should happen next.
+## Why this exists
 
-Policy Atlas reads the configuration that is actually present in a tenant, records
-what it can and cannot prove, and turns the result into a prioritized implementation
-plan. It is intended for identity engineers, security teams, consultants, and
-administrators who need something more defensible than a policy checklist.
+Looking at a list of Conditional Access policies does not tell you whether a tenant
+is well protected.
 
-> Policy Atlas is diagnostic guidance, not a Microsoft product or a certified audit.
-> Review every recommendation before changing production access policy.
+A tenant can have dozens of policies and still have important gaps: legacy
+authentication may still work, emergency accounts may not be handled safely,
+administrators may have weaker protection than expected, or exclusions may have
+grown without anyone reviewing them. It is also common to know that improvements
+are needed without knowing which one should be tackled first.
 
-## What it delivers
+Policy Atlas was built to make that review easier. It reads the Conditional Access
+configuration, checks it against 28 practical controls, and produces a local report
+showing:
 
-- A local HTML report designed for technical review and stakeholder discussion.
-- A versioned JSON evidence snapshot that can be validated and compared over time.
-- Coverage across 28 Conditional Access controls, including device code flow,
-  workload identities, privileged access, session controls, external identities,
-  and agentic identities.
-- A weighted maturity score out of 100 instead of treating every control as equal.
-- A recommended rollout order informed by security value, prerequisites,
-  implementation effort, and potential blast radius.
-- Direct implementation guidance from Microsoft Learn for every control.
-- Explicit `detected`, `missing`, `unknown`, `manual_confirmation`, and
-  `not_applicable` evidence states.
+- what was found;
+- what appears to be missing;
+- what the script could not verify automatically;
+- how the tenant scored; and
+- what should be implemented first.
 
-The collector requests read permissions only. It does not create, update, disable,
-or delete Conditional Access policies.
+The aim is not to replace an experienced identity engineer. It is to give that
+engineer a useful starting point and a report they can explain to somebody else.
 
-## From policy inventory to evidence
+## What you get
 
-Policy Atlas deliberately separates observation from interpretation:
+Each assessment produces two files on your computer:
 
-1. **Collect** — query documented Microsoft Graph endpoints using delegated,
-   read-only scopes.
-2. **Classify** — record whether each control is detected, missing, unresolved,
-   manually verifiable, or not applicable.
-3. **Score** — apply the published control weights and normalize the applicable
-   result to 100.
-4. **Plan** — order unresolved controls into a practical rollout sequence and show
-   the implementation considerations for each one.
+```text
+<timestamp>.html    The assessment report and recommended rollout order
+<timestamp>.json    The evidence snapshot used to produce the result
+```
 
-When the collector cannot establish a fact safely, it does not guess. The result is
-reported as unknown or requiring manual confirmation and earns no maturity points
-until verified.
+The report covers 28 controls across areas such as:
 
-## How maturity is calculated
+- users and authentication;
+- privileged identities and emergency access;
+- devices and applications;
+- sessions and tokens;
+- guests and external identities;
+- workload identities;
+- agentic identities; and
+- policy operations and governance.
 
-The 28 controls collectively carry 100 points. Foundational controls with high
-security impact and broad exposure carry more weight than narrower or advanced
-capabilities. For example, emergency-access governance, blocking legacy
-authentication, administrator MFA, and tenant-wide MFA each carry more weight than
-a Terms of Use policy or an advanced integration.
+Every control includes a link to relevant Microsoft implementation guidance. The
+report also distinguishes between a control that is genuinely missing and one that
+still needs a person to confirm it.
 
-| Evidence result | Scoring treatment |
+## How the score works
+
+The assessment is marked out of 100. The 28 controls do not all carry the same
+number of points.
+
+Controls that reduce a large or immediate risk carry more weight. Emergency-access
+governance, blocking legacy authentication, administrator MFA, and tenant-wide MFA
+therefore contribute more than narrower or advanced controls.
+
+| Result | What happens to the points |
 |---|---|
-| Detected | Earns the control's full point value |
-| Missing | Earns zero points |
-| Unknown or error | Earns zero until collection is resolved |
-| Manual confirmation | Earns zero until reviewed evidence is supplied |
-| Not applicable | Removed from the available total |
+| Detected | The control earns its full points |
+| Missing | No points are earned |
+| Unknown or collection error | No points are earned until the issue is resolved |
+| Manual confirmation | No points are earned until somebody verifies the control |
+| Not applicable | The control is removed from the available total |
 
 The calculation is:
 
 ```text
-maturity score = earned weighted points / applicable weighted points × 100
+score = earned points / applicable points × 100
 ```
 
-| Score | Maturity stage |
+| Score | Stage |
 |---:|---|
 | 0–24 | Stage 0 — Unmanaged |
 | 25–49 | Stage 1 — Foundational |
@@ -82,18 +85,23 @@ maturity score = earned weighted points / applicable weighted points × 100
 | 70–84 | Stage 3 — Adaptive |
 | 85–100 | Stage 4 — Optimized |
 
-Critical gaps are reported separately as implementation-readiness blockers. The
-complete weights, stage bands, and critical-control definitions are published in
-[`assessment-model.json`](assessment-model.json); the scoring implementation is
-shared between PowerShell and the browser renderer and checked by automated tests.
+Scoring and rollout order are related, but they are not the same thing. The score
+describes the protection that was found. The rollout order also considers effort,
+dependencies, and the damage a badly planned change could cause.
 
-## Quick start
+The full point allocation is in [`assessment-model.json`](assessment-model.json).
+It is kept in the repository so that the result can be challenged, reviewed, and
+improved rather than hidden inside the script.
+
+## Run an assessment
 
 ### Requirements
 
-- PowerShell 7 or later. Windows PowerShell 5.1 is not supported.
-- A Microsoft Entra account permitted to read the requested configuration.
-- The Microsoft Graph PowerShell SDK.
+- PowerShell 7 or later;
+- the Microsoft Graph PowerShell SDK; and
+- a Microsoft Entra account allowed to read the requested configuration.
+
+Windows PowerShell 5.1 is not supported.
 
 ```powershell
 Install-Module Microsoft.Graph -Scope CurrentUser
@@ -101,7 +109,7 @@ git clone https://github.com/Whiteends/policy-atlas.git
 Set-Location .\policy-atlas
 ```
 
-Run a basic read-only assessment and choose where the report should be written:
+Choose the tenant and the folder where you want the results saved:
 
 ```powershell
 .\Assess-ConditionalAccessMaturity.ps1 `
@@ -109,37 +117,56 @@ Run a basic read-only assessment and choose where the report should be written:
   -OutputPath "C:\CA-Assessment\Results"
 ```
 
-The script prints its requested scopes and target output folder before connecting.
-Type `CONFIRM` only after checking both. A browser sign-in window may open through
-Web Account Manager.
+Before it connects, the script displays the tenant, requested permissions, and
+output folder. Check them and type `CONFIRM`. A browser sign-in window may open.
 
-The output folder will contain:
-
-```text
-<timestamp>.html    Human-readable assessment and rollout plan
-<timestamp>.json    Structured, versioned evidence snapshot
-```
-
-Use a development or test tenant first. The controlled validation procedure is in
+Start with a development or test tenant where possible. The validation steps are in
 [`docs/TENANT-VALIDATION.md`](docs/TENANT-VALIDATION.md).
 
-## Permissions and optional evidence
+## Permissions
 
-The basic assessment requests:
+The normal assessment requests two delegated, read-only Microsoft Graph scopes:
 
-| Scope | Purpose |
+| Scope | Why it is needed |
 |---|---|
-| `Policy.Read.All` | Read Conditional Access policies and related policy configuration |
-| `Organization.Read.All` | Read subscribed SKUs used to interpret feature availability |
+| `Policy.Read.All` | Read Conditional Access policies and related settings |
+| `Organization.Read.All` | Read licence information used when interpreting feature availability |
 
-Optional switches request additional read-only scopes only when selected:
+Optional checks request extra read permissions only when you select them:
 
-| Option | Additional scope | Purpose |
+| Option | Additional scope | What it adds |
 |---|---|---|
-| `-IncludeSignInActivity` | `AuditLog.Read.All` | Add recent sign-in activity as rollout context |
-| `-IncludeAgentInventory` | `AgentIdentity.Read.All`, `AgentIdentityBlueprint.Read.All` | Add agent identity and blueprint inventory |
+| `-IncludeSignInActivity` | `AuditLog.Read.All` | Recent sign-in activity for rollout context |
+| `-IncludeAgentInventory` | `AgentIdentity.Read.All`, `AgentIdentityBlueprint.Read.All` | Agent identity and blueprint inventory |
 
-Additional examples:
+For all options and examples, see [`SCRIPT-README.md`](SCRIPT-README.md).
+
+## What the script does not do
+
+Policy Atlas does not request Microsoft Graph write permissions. It does not create,
+change, enable, disable, or delete policies.
+
+It also does not upload the assessment to a website. The HTML report and JSON
+snapshot are written to the output folder you choose. Tenant and policy identifiers
+stored in the snapshot are hashed, and generated tenant reports are excluded from
+Git by default.
+
+You should still read the script and review the displayed permissions before signing
+in. Read-only does not mean consequence-free: the report contains security
+information about the assessed environment and should be handled accordingly.
+
+## What the evidence states mean
+
+- **Detected** — the collected configuration supports the finding.
+- **Missing** — collection succeeded, but the expected control was not found.
+- **Manual confirmation** — the control needs a person to verify it.
+- **Unknown** — the collector could not obtain enough evidence.
+- **Not applicable** — the control does not apply to this environment.
+
+Policy Atlas does not turn an uncertain result into a pass. Unknown and manual
+results remain visible until they are resolved.
+
+## Optional assessment features
 
 ```powershell
 # Include recent sign-in context
@@ -148,76 +175,64 @@ Additional examples:
   -OutputPath ".\results" `
   -IncludeSignInActivity
 
-# Include agentic identity inventory
+# Include agent identity inventory
 .\Assess-ConditionalAccessMaturity.ps1 `
   -TenantId "<TENANT-GUID>" `
   -OutputPath ".\results" `
   -IncludeAgentInventory
 
-# Check emergency-access exclusions without writing object IDs to the report
+# Review emergency-access exclusions; supplied IDs are not written to the report
 .\Assess-ConditionalAccessMaturity.ps1 `
   -TenantId "<TENANT-GUID>" `
   -OutputPath ".\results" `
   -EmergencyAccessObjectId "<OBJECT-ID-1>","<OBJECT-ID-2>"
 
-# Compare with an earlier snapshot from the same tenant
+# Compare the result with an earlier snapshot from the same tenant
 .\Assess-ConditionalAccessMaturity.ps1 `
   -TenantId "<TENANT-GUID>" `
   -OutputPath ".\results" `
   -CompareTo ".\previous-results\<timestamp>.json"
 ```
 
-See [`SCRIPT-README.md`](SCRIPT-README.md) for the full security boundary and usage
-notes.
+## About the methodology
 
-## Privacy and trust boundary
+Policy Atlas is an independent open-source project. It is not an official Microsoft
+assessment and the score is not a Microsoft certification.
 
-- No Microsoft Graph write scopes are requested.
-- No tenant data is uploaded to the Policy Atlas website or another service.
-- Reports and snapshots are written to the output folder selected by the operator.
-- Tenant and policy identifiers stored in snapshots are hashed.
-- Generated reports, raw policy exports, and reviewed override files are excluded
-  from Git by default.
-- The browser report renderer processes snapshots locally in browser memory.
+The point values are the project's assessment model. They are published, versioned,
+and tested so users can see exactly how a result was reached. Feedback from real
+assessments and identity practitioners will be used to refine the model over time.
+Changes to scoring should include a clear risk-based reason and tests showing the
+effect on existing results.
 
-You should still inspect the script and confirm the displayed scopes before signing
-in. Open source makes the collection boundary reviewable; it does not remove the
-operator's responsibility to validate it.
+This does not prevent people from using the tool. It explains what the score is—and
+what it is not—so that nobody presents a Policy Atlas result as an official Microsoft
+rating.
 
-## Repository guide
+## Repository map
 
-| Path | Purpose |
+| Path | Contents |
 |---|---|
-| [`Assess-ConditionalAccessMaturity.ps1`](Assess-ConditionalAccessMaturity.ps1) | Read-only tenant collector and HTML report generator |
-| [`assessment-model.json`](assessment-model.json) | Weighted scoring model and critical-control definitions |
-| [`ca-policy-library.json`](ca-policy-library.json) | The 28 control patterns and implementation guidance |
-| [`ca-maturity-model.json`](ca-maturity-model.json) | Human-readable maturity-stage descriptions |
-| [`src/Assessment.Core.psm1`](src/Assessment.Core.psm1) | PowerShell scoring and snapshot validation logic |
-| [`assets/assessment-core.js`](assets/assessment-core.js) | Browser-side scoring and validation logic |
-| [`schemas/snapshot-schema-v1.json`](schemas/snapshot-schema-v1.json) | Snapshot contract |
+| [`Assess-ConditionalAccessMaturity.ps1`](Assess-ConditionalAccessMaturity.ps1) | Tenant collector and HTML report generator |
+| [`assessment-model.json`](assessment-model.json) | Point weights, score bands, and critical controls |
+| [`ca-policy-library.json`](ca-policy-library.json) | The 28 assessed controls and implementation guidance |
+| [`ca-maturity-model.json`](ca-maturity-model.json) | Maturity-stage descriptions |
+| [`src/Assessment.Core.psm1`](src/Assessment.Core.psm1) | PowerShell scoring and snapshot validation |
+| [`assets/assessment-core.js`](assets/assessment-core.js) | Browser-side scoring and validation |
+| [`schemas/snapshot-schema-v1.json`](schemas/snapshot-schema-v1.json) | JSON snapshot format |
 | [`tests/`](tests/) | Safety, scoring, schema, and fixture tests |
 
-The static site also provides an overview, assessment guidance, policy library,
-maturity model, methodology, and local snapshot renderer.
-
-## Validate and contribute
+## Tests and contributions
 
 ```powershell
 pwsh -NoProfile -File ".\tests\Run-Tests.ps1"
 .\Validate-Snapshot.ps1 -Path ".\tests\fixtures\stage-2-complete.json"
 ```
 
-Scoring changes must explain their risk rationale and keep the model transparent.
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Please report
-sensitive vulnerabilities according to [`SECURITY.md`](SECURITY.md), not in a public
-issue.
-
-## Project status
-
-Policy Atlas is in preview. The collection and scoring model are functional and
-automatically tested, but the weights are an open, expert-designed methodology—not
-a Microsoft-certified standard. Real-tenant validation, peer review, and calibration
-against diverse Conditional Access environments are ongoing priorities.
+Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before
+opening a pull request. Security issues that could expose tenant data or weaken the
+read-only boundary should be reported according to [`SECURITY.md`](SECURITY.md), not
+in a public issue.
 
 ## License
 
