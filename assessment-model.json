@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "stageThresholdPercent": 80,
+  "weightedScoring": {
+    "description": "Control weights represent relative security impact and exposure coverage. They total 100 points before not-applicable controls are removed.",
+    "bands": [
+      { "minimum": 0, "stage": 0 },
+      { "minimum": 25, "stage": 1 },
+      { "minimum": 50, "stage": 2 },
+      { "minimum": 70, "stage": 3 },
+      { "minimum": 85, "stage": 4 }
+    ],
+    "weights": {
+      "break-glass-exclusion": 7,
+      "block-legacy-auth": 7,
+      "mfa-admins-strict": 7,
+      "mfa-all-users": 7,
+      "auth-strength-phishing-resistant": 6,
+      "block-device-code-flow": 5,
+      "device-compliance-sensitive-apps": 5,
+      "risk-based-signin": 5,
+      "azure-management-protection": 4,
+      "risk-based-user": 4,
+      "pim-step-up": 4,
+      "workload-identity-ca": 4,
+      "guest-access-restriction": 3,
+      "session-controls-unmanaged": 3,
+      "app-protection-policy-mam": 3,
+      "token-protection": 3,
+      "cross-tenant-access-enforcement": 3,
+      "policy-as-code": 3,
+      "agent-approved-access": 3,
+      "mfa-registration-enforcement": 2,
+      "cae-enable": 2,
+      "defender-cloud-apps-session-control": 2,
+      "agent-risk-block": 2,
+      "agent-obo-access": 2,
+      "block-unsupported-platforms": 1,
+      "terms-of-use": 1,
+      "global-secure-access": 1,
+      "insider-risk-signal": 1
+    }
+  },
+  "stages": {
+    "1": {
+      "required": ["block-legacy-auth", "block-device-code-flow", "mfa-all-users", "mfa-admins-strict", "break-glass-exclusion", "mfa-registration-enforcement", "block-unsupported-platforms"],
+      "critical": ["block-legacy-auth", "block-device-code-flow", "mfa-all-users", "mfa-admins-strict", "break-glass-exclusion"]
+    },
+    "2": {
+      "required": ["device-compliance-sensitive-apps", "session-controls-unmanaged", "guest-access-restriction", "app-protection-policy-mam", "azure-management-protection", "terms-of-use"],
+      "critical": ["device-compliance-sensitive-apps", "guest-access-restriction"]
+    },
+    "3": {
+      "required": ["risk-based-signin", "risk-based-user", "auth-strength-phishing-resistant", "pim-step-up", "cae-enable", "workload-identity-ca", "token-protection"],
+      "critical": ["risk-based-signin", "risk-based-user", "auth-strength-phishing-resistant"]
+    },
+    "4": {
+      "required": ["cross-tenant-access-enforcement", "global-secure-access", "defender-cloud-apps-session-control", "insider-risk-signal", "policy-as-code", "agent-approved-access", "agent-risk-block", "agent-obo-access"],
+      "critical": ["cross-tenant-access-enforcement", "policy-as-code"]
+    }
+  }
+}

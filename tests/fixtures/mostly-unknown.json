@@ -1,0 +1,337 @@
+﻿{
+    "schemaVersion":  "1.0.0",
+    "scriptVersion":  "0.2.0",
+    "modelVersion":  "1.0.0",
+    "policyLibraryVersion":  "1.0.0",
+    "generatedAt":  "2026-09-21T12:00:00.0000000Z",
+    "tenant":  {
+                   "fingerprint":  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                   "cloud":  "Global"
+               },
+    "collector":  {
+                      "powerShellVersion":  "7.5.0",
+                      "graphSdkVersion":  "2.0.0",
+                      "apiVersion":  "v1.0"
+                  },
+    "context":  {
+                    "policyCount":  0,
+                    "enabledPolicyCount":  0,
+                    "reportOnlyPolicyCount":  0,
+                    "licensing":  {
+                                      "hasEntraP1":  false,
+                                      "hasEntraP2":  false
+                                  },
+                    "signInActivity":  {
+                                           "requested":  false,
+                                           "legacyAuthSignInsLast7Days":  null
+                                       }
+                },
+    "assessment":  {
+                       "stage":  0,
+                       "provisionalStage":  0,
+                       "confidence":  0.04,
+                       "confidenceLabel":  "low",
+                       "stageResults":  {
+                                            "1":  {
+                                                      "stage":  1,
+                                                      "requiredCount":  6,
+                                                      "applicableCount":  6,
+                                                      "detectedCount":  1,
+                                                      "coveragePercent":  17,
+                                                      "confirmed":  false,
+                                                      "provisional":  false,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+                                                                         "block-legacy-auth",
+                                                                         "mfa-admins-strict",
+                                                                         "break-glass-exclusion",
+                                                                         "mfa-registration-enforcement",
+                                                                         "block-unsupported-platforms"
+                                                                     ],
+                                                      "failedCritical":  [
+                                                                             "block-legacy-auth",
+                                                                             "mfa-admins-strict",
+                                                                             "break-glass-exclusion"
+                                                                         ]
+                                                  },
+                                            "2":  {
+                                                      "stage":  2,
+                                                      "requiredCount":  6,
+                                                      "applicableCount":  6,
+                                                      "detectedCount":  0,
+                                                      "coveragePercent":  0,
+                                                      "confirmed":  false,
+                                                      "provisional":  false,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+                                                                         "device-compliance-sensitive-apps",
+                                                                         "session-controls-unmanaged",
+                                                                         "guest-access-restriction",
+                                                                         "app-protection-policy-mam",
+                                                                         "azure-management-protection",
+                                                                         "terms-of-use"
+                                                                     ],
+                                                      "failedCritical":  [
+                                                                             "device-compliance-sensitive-apps",
+                                                                             "guest-access-restriction"
+                                                                         ]
+                                                  },
+                                            "3":  {
+                                                      "stage":  3,
+                                                      "requiredCount":  7,
+                                                      "applicableCount":  7,
+                                                      "detectedCount":  0,
+                                                      "coveragePercent":  0,
+                                                      "confirmed":  false,
+                                                      "provisional":  false,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+                                                                         "risk-based-signin",
+                                                                         "risk-based-user",
+                                                                         "auth-strength-phishing-resistant",
+                                                                         "pim-step-up",
+                                                                         "cae-enable",
+                                                                         "workload-identity-ca",
+                                                                         "token-protection"
+                                                                     ],
+                                                      "failedCritical":  [
+                                                                             "risk-based-signin",
+                                                                             "risk-based-user",
+                                                                             "auth-strength-phishing-resistant"
+                                                                         ]
+                                                  },
+                                            "4":  {
+                                                      "stage":  4,
+                                                      "requiredCount":  5,
+                                                      "applicableCount":  5,
+                                                      "detectedCount":  0,
+                                                      "coveragePercent":  0,
+                                                      "confirmed":  false,
+                                                      "provisional":  false,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+                                                                         "cross-tenant-access-enforcement",
+                                                                         "global-secure-access",
+                                                                         "defender-cloud-apps-session-control",
+                                                                         "insider-risk-signal",
+                                                                         "policy-as-code"
+                                                                     ],
+                                                      "failedCritical":  [
+                                                                             "cross-tenant-access-enforcement",
+                                                                             "policy-as-code"
+                                                                         ]
+                                                  }
+                                        }
+                   },
+    "signals":  {
+                    "block-legacy-auth":  {
+                                              "status":  "unknown",
+                                              "reason":  "Fixture \u0027mostly-unknown\u0027 sets block-legacy-auth to unknown.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                          },
+                    "mfa-all-users":  {
+                                          "status":  "detected",
+                                          "reason":  "Fixture \u0027mostly-unknown\u0027 sets mfa-all-users to detected.",
+                                          "evidence":  [
+
+                                                       ],
+                                          "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                      },
+                    "mfa-admins-strict":  {
+                                              "status":  "unknown",
+                                              "reason":  "Fixture \u0027mostly-unknown\u0027 sets mfa-admins-strict to unknown.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                          },
+                    "break-glass-exclusion":  {
+                                                  "status":  "unknown",
+                                                  "reason":  "Fixture \u0027mostly-unknown\u0027 sets break-glass-exclusion to unknown.",
+                                                  "evidence":  [
+
+                                                               ],
+                                                  "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                              },
+                    "mfa-registration-enforcement":  {
+                                                         "status":  "unknown",
+                                                         "reason":  "Fixture \u0027mostly-unknown\u0027 sets mfa-registration-enforcement to unknown.",
+                                                         "evidence":  [
+
+                                                                      ],
+                                                         "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                     },
+                    "block-unsupported-platforms":  {
+                                                        "status":  "unknown",
+                                                        "reason":  "Fixture \u0027mostly-unknown\u0027 sets block-unsupported-platforms to unknown.",
+                                                        "evidence":  [
+
+                                                                     ],
+                                                        "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                    },
+                    "device-compliance-sensitive-apps":  {
+                                                             "status":  "unknown",
+                                                             "reason":  "Fixture \u0027mostly-unknown\u0027 sets device-compliance-sensitive-apps to unknown.",
+                                                             "evidence":  [
+
+                                                                          ],
+                                                             "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                         },
+                    "session-controls-unmanaged":  {
+                                                       "status":  "unknown",
+                                                       "reason":  "Fixture \u0027mostly-unknown\u0027 sets session-controls-unmanaged to unknown.",
+                                                       "evidence":  [
+
+                                                                    ],
+                                                       "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                   },
+                    "guest-access-restriction":  {
+                                                     "status":  "unknown",
+                                                     "reason":  "Fixture \u0027mostly-unknown\u0027 sets guest-access-restriction to unknown.",
+                                                     "evidence":  [
+
+                                                                  ],
+                                                     "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                 },
+                    "app-protection-policy-mam":  {
+                                                      "status":  "unknown",
+                                                      "reason":  "Fixture \u0027mostly-unknown\u0027 sets app-protection-policy-mam to unknown.",
+                                                      "evidence":  [
+
+                                                                   ],
+                                                      "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                  },
+                    "azure-management-protection":  {
+                                                        "status":  "unknown",
+                                                        "reason":  "Fixture \u0027mostly-unknown\u0027 sets azure-management-protection to unknown.",
+                                                        "evidence":  [
+
+                                                                     ],
+                                                        "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                    },
+                    "terms-of-use":  {
+                                         "status":  "unknown",
+                                         "reason":  "Fixture \u0027mostly-unknown\u0027 sets terms-of-use to unknown.",
+                                         "evidence":  [
+
+                                                      ],
+                                         "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                     },
+                    "risk-based-signin":  {
+                                              "status":  "unknown",
+                                              "reason":  "Fixture \u0027mostly-unknown\u0027 sets risk-based-signin to unknown.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                          },
+                    "risk-based-user":  {
+                                            "status":  "unknown",
+                                            "reason":  "Fixture \u0027mostly-unknown\u0027 sets risk-based-user to unknown.",
+                                            "evidence":  [
+
+                                                         ],
+                                            "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                        },
+                    "auth-strength-phishing-resistant":  {
+                                                             "status":  "unknown",
+                                                             "reason":  "Fixture \u0027mostly-unknown\u0027 sets auth-strength-phishing-resistant to unknown.",
+                                                             "evidence":  [
+
+                                                                          ],
+                                                             "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                         },
+                    "pim-step-up":  {
+                                        "status":  "unknown",
+                                        "reason":  "Fixture \u0027mostly-unknown\u0027 sets pim-step-up to unknown.",
+                                        "evidence":  [
+
+                                                     ],
+                                        "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                    },
+                    "cae-enable":  {
+                                       "status":  "unknown",
+                                       "reason":  "Fixture \u0027mostly-unknown\u0027 sets cae-enable to unknown.",
+                                       "evidence":  [
+
+                                                    ],
+                                       "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                   },
+                    "workload-identity-ca":  {
+                                                 "status":  "unknown",
+                                                 "reason":  "Fixture \u0027mostly-unknown\u0027 sets workload-identity-ca to unknown.",
+                                                 "evidence":  [
+
+                                                              ],
+                                                 "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                             },
+                    "token-protection":  {
+                                             "status":  "unknown",
+                                             "reason":  "Fixture \u0027mostly-unknown\u0027 sets token-protection to unknown.",
+                                             "evidence":  [
+
+                                                          ],
+                                             "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                         },
+                    "cross-tenant-access-enforcement":  {
+                                                            "status":  "unknown",
+                                                            "reason":  "Fixture \u0027mostly-unknown\u0027 sets cross-tenant-access-enforcement to unknown.",
+                                                            "evidence":  [
+
+                                                                         ],
+                                                            "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                        },
+                    "global-secure-access":  {
+                                                 "status":  "unknown",
+                                                 "reason":  "Fixture \u0027mostly-unknown\u0027 sets global-secure-access to unknown.",
+                                                 "evidence":  [
+
+                                                              ],
+                                                 "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                             },
+                    "defender-cloud-apps-session-control":  {
+                                                                "status":  "unknown",
+                                                                "reason":  "Fixture \u0027mostly-unknown\u0027 sets defender-cloud-apps-session-control to unknown.",
+                                                                "evidence":  [
+
+                                                                             ],
+                                                                "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                                            },
+                    "insider-risk-signal":  {
+                                                "status":  "unknown",
+                                                "reason":  "Fixture \u0027mostly-unknown\u0027 sets insider-risk-signal to unknown.",
+                                                "evidence":  [
+
+                                                             ],
+                                                "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                            },
+                    "policy-as-code":  {
+                                           "status":  "unknown",
+                                           "reason":  "Fixture \u0027mostly-unknown\u0027 sets policy-as-code to unknown.",
+                                           "evidence":  [
+
+                                                        ],
+                                           "checkedAt":  "2026-09-22T11:43:26.6963580Z"
+                                       }
+                },
+    "manualChecks":  [
+
+                     ],
+    "warnings":  [
+
+                 ],
+    "errors":  [
+
+               ]
+}

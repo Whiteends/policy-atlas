@@ -1,0 +1,26 @@
+{
+  "break-glass-exclusion": {
+    "status": "manual_confirmation",
+    "reason": "Confirm that at least two emergency-access accounts exist, are excluded from every CA policy, are monitored, and were tested recently."
+  },
+  "pim-step-up": {
+    "status": "manual_confirmation",
+    "reason": "Confirm that PIM activation uses an authentication context protected by an appropriate CA policy."
+  },
+  "global-secure-access": {
+    "status": "manual_confirmation",
+    "reason": "Confirm Global Secure Access policy coverage and operational deployment."
+  },
+  "defender-cloud-apps-session-control": {
+    "status": "manual_confirmation",
+    "reason": "Confirm Defender for Cloud Apps session-control onboarding and policy coverage."
+  },
+  "insider-risk-signal": {
+    "status": "manual_confirmation",
+    "reason": "Confirm whether Purview Insider Risk signals are integrated into access controls."
+  },
+  "policy-as-code": {
+    "status": "manual_confirmation",
+    "reason": "Confirm source control, peer review, automated validation, and rollback for CA policy changes."
+  }
+}

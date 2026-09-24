@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ca-posture.example/schemas/snapshot-schema-v1.json",
+  "title": "Policy Atlas assessment snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "scriptVersion", "modelVersion", "policyLibraryVersion", "generatedAt", "tenant", "collector", "context", "assessment", "signals", "manualChecks", "warnings", "errors"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "scriptVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "modelVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "policyLibraryVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "tenant": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fingerprint", "cloud"],
+      "properties": { "fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "cloud": { "type": "string", "minLength": 1 } }
+    },
+    "collector": {
+      "type": "object", "additionalProperties": false,
+      "required": ["powerShellVersion", "graphSdkVersion", "apiVersion"],
+      "properties": { "powerShellVersion": { "type": "string" }, "graphSdkVersion": { "type": "string" }, "apiVersion": { "enum": ["v1.0"] } }
+    },
+    "context": {
+      "type": "object", "additionalProperties": false,
+      "required": ["policyCount", "enabledPolicyCount", "reportOnlyPolicyCount", "licensing", "signInActivity"],
+      "properties": {
+        "policyCount": { "type": ["integer", "null"], "minimum": 0 },
+        "enabledPolicyCount": { "type": ["integer", "null"], "minimum": 0 },
+        "reportOnlyPolicyCount": { "type": ["integer", "null"], "minimum": 0 },
+        "broadCoveragePolicyCount": { "type": ["integer", "null"], "minimum": 0 },
+        "policiesWithExclusions": { "type": ["integer", "null"], "minimum": 0 },
+        "licensing": {
+          "type": "object", "additionalProperties": false, "required": ["hasEntraP1", "hasEntraP2"],
+          "properties": { "hasEntraP1": { "type": ["boolean", "null"] }, "hasEntraP2": { "type": ["boolean", "null"] } }
+        },
+        "signInActivity": {
+          "type": "object", "additionalProperties": false, "required": ["requested", "legacyAuthSignInsLast7Days"],
+          "properties": { "requested": { "type": "boolean" }, "legacyAuthSignInsLast7Days": { "type": ["integer", "null"], "minimum": 0 } }
+        },
+        "agentInventory": {
+          "type": "object", "additionalProperties": false,
+          "required": ["requested", "available", "identityCount", "enabledCount", "disabledCount", "blueprintCount"],
+          "properties": {
+            "requested": { "type": "boolean" }, "available": { "type": "boolean" },
+            "identityCount": { "type": ["integer", "null"], "minimum": 0 },
+            "enabledCount": { "type": ["integer", "null"], "minimum": 0 },
+            "disabledCount": { "type": ["integer", "null"], "minimum": 0 },
+            "blueprintCount": { "type": ["integer", "null"], "minimum": 0 }
+          }
+        },
+        "operationalAnalysis": {
+          "type": "object", "additionalProperties": true,
+          "required": ["available", "policiesWithExclusions", "exclusionReferences", "overlapPairs", "emergencyAccess"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "policiesWithExclusions": { "type": ["integer", "null"], "minimum": 0 },
+            "exclusionReferences": { "type": ["integer", "null"], "minimum": 0 },
+            "overlapPairs": { "type": "array" },
+            "emergencyAccess": { "type": "object" }
+          }
+        }
+      }
+    },
+    "assessment": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stage", "provisionalStage", "confidence", "confidenceLabel", "stageResults"],
+      "properties": {
+        "stage": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "provisionalStage": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "maturityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "earnedPoints": { "type": "number", "minimum": 0, "maximum": 100 },
+        "availablePoints": { "type": "number", "minimum": 0, "maximum": 100 },
+        "unresolvedPoints": { "type": "number", "minimum": 0, "maximum": 100 },
+        "scoreStage": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "criticalCap": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "confidenceLabel": { "enum": ["low", "moderate", "high"] },
+        "stageResults": { "type": "object" }
+      }
+    },
+    "signals": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/signal" }
+    },
+    "manualChecks": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "warnings": { "type": "array", "items": { "$ref": "#/$defs/message" } },
+    "errors": { "type": "array", "items": { "$ref": "#/$defs/message" } }
+  },
+  "$defs": {
+    "signal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "reason", "evidence", "checkedAt"],
+      "properties": {
+        "status": { "enum": ["detected", "missing", "not_applicable", "manual_confirmation", "unknown", "error"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "items": { "type": "object" } },
+        "checkedAt": { "type": "string", "format": "date-time" },
+        "errorCode": { "type": "string" }
+      }
+    },
+    "message": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": { "code": { "type": "string" }, "message": { "type": "string" }, "signalId": { "type": "string" } }
+    }
+  }
+}

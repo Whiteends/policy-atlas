@@ -1,0 +1,371 @@
+{
+  "policies": [
+    {
+      "id": "block-device-code-flow",
+      "name": "Block Device Code Flow",
+      "category": "Baseline Protection",
+      "maturity_stage": 1,
+      "description": "Blocks OAuth device code flow except for narrowly documented scenarios that cannot use safer authentication methods.",
+      "conditions": "All users and all resources; Authentication flows: Device code flow; exclude emergency accounts and only documented dependencies",
+      "grant_controls": "Block access",
+      "why_it_matters": "Device code phishing sends a victim to Microsoft's legitimate sign-in page while the attacker controls the initiating session. MFA alone does not remove this risk.",
+      "gotchas": [
+        "Review sign-in logs for device code flow and original transfer method before enforcement",
+        "Teams devices, Azure CLI, developer tools, and device registration can depend on this flow",
+        "If device registration uses device code flow, exclude the Device Registration Service resource rather than creating a broad user exception"
+      ]
+    },
+    {
+      "id": "block-legacy-auth",
+      "name": "Block Legacy Authentication",
+      "category": "Baseline Protection",
+      "maturity_stage": 1,
+      "description": "Blocks sign-ins using legacy auth protocols (POP, IMAP, older SMTP AUTH, legacy Office clients) that cannot enforce MFA.",
+      "conditions": "Client apps: Exchange ActiveSync clients, Other clients (legacy auth)",
+      "grant_controls": "Block access",
+      "why_it_matters": "Legacy auth is the single most common vector for password-spray attacks because it bypasses MFA entirely. Blocking it closes off a large share of automated credential-based attacks with minimal user impact once modern clients are confirmed in use.",
+      "gotchas": [
+        "Check sign-in logs for existing legacy-auth usage (old scanners, printers, shared mailboxes, cron jobs using SMTP AUTH) before enforcing — this breaks silently and generates helpdesk tickets days later if skipped",
+        "Roll out in report-only mode first for at least 1-2 weeks"
+      ]
+    },
+    {
+      "id": "mfa-all-users",
+      "name": "Require MFA for All Users",
+      "category": "Baseline Protection",
+      "maturity_stage": 1,
+      "description": "Requires multi-factor authentication for every user on every sign-in, replacing Security Defaults' blanket policy with a tunable one.",
+      "conditions": "All users (excluding break-glass accounts), all cloud apps",
+      "grant_controls": "Require multi-factor authentication",
+      "why_it_matters": "MFA remains the highest-leverage single control against credential compromise. Moving off Security Defaults to a custom policy allows exclusions, reporting, and staged rollout that Security Defaults doesn't support.",
+      "gotchas": [
+        "Always exclude break-glass accounts explicitly",
+        "Consider excluding known service accounts and instead securing those via certificate-based auth or managed identities rather than blanket exclusion"
+      ]
+    },
+    {
+      "id": "mfa-admins-strict",
+      "name": "Require MFA for Admin Roles (Stricter)",
+      "category": "Privileged Access",
+      "maturity_stage": 1,
+      "description": "A tighter MFA requirement scoped specifically to privileged directory roles (Global Admin, Privileged Role Admin, Security Admin, etc.), separate from the general-user MFA policy.",
+      "conditions": "Directory roles: all privileged built-in roles",
+      "grant_controls": "Require multi-factor authentication (tighten to authentication strength in Stage 3)",
+      "why_it_matters": "Admin accounts are the highest-value targets in the tenant. A dedicated policy makes it possible to enforce stronger requirements for this group without over-constraining general users.",
+      "gotchas": [
+        "Keep this policy separate from the general MFA policy, even though they overlap, so it can evolve independently (e.g. adding authentication strength requirements later)"
+      ]
+    },
+    {
+      "id": "break-glass-exclusion",
+      "name": "Break-Glass Account Governance",
+      "category": "Baseline Protection",
+      "maturity_stage": 1,
+      "description": "Not a CA policy itself, but a required companion control: 2+ emergency access accounts excluded from all Conditional Access policies, using long complex passwords (not MFA-dependent), monitored with high-priority alerting on any sign-in.",
+      "conditions": "N/A — governance control",
+      "grant_controls": "N/A",
+      "why_it_matters": "Without a tested break-glass path, a CA misconfiguration (e.g. an overly broad block policy) can lock out every admin simultaneously, including the ability to fix the policy that caused it.",
+      "gotchas": [
+        "Test break-glass sign-in on a fixed schedule (e.g. quarterly) — an untested break-glass account is a false sense of security",
+        "Alert immediately (via Sentinel/Defender) on any sign-in to these accounts, since legitimate use should be rare and planned"
+      ]
+    },
+    {
+      "id": "device-compliance-sensitive-apps",
+      "name": "Require Compliant Device for Sensitive Apps",
+      "category": "Device & App Tiering",
+      "maturity_stage": 2,
+      "description": "Requires an Intune-compliant or hybrid Entra-joined device to access high-sensitivity applications (finance, HR, admin portals).",
+      "conditions": "Target apps: tier-1 sensitive apps; Users: relevant group(s)",
+      "grant_controls": "Require device to be marked as compliant OR hybrid Azure AD joined",
+      "why_it_matters": "Ties access to device posture, not just identity — a stolen credential with MFA satisfied still can't reach sensitive data from an unmanaged device.",
+      "gotchas": [
+        "Requires Intune (or another compliance-capable MDM) already deployed and device compliance policies tuned before this is enforceable without breaking access",
+        "Plan a path for BYOD/mobile users (e.g. app protection policies) rather than fully locking them out"
+      ]
+    },
+    {
+      "id": "session-controls-unmanaged",
+      "name": "Session Controls for Unmanaged Devices",
+      "category": "Session Management",
+      "maturity_stage": 2,
+      "description": "For sign-ins from unmanaged/non-compliant devices, restricts to browser-based access with no persistent session and limited download/print via app-enforced restrictions (where supported, e.g. SharePoint/OneDrive).",
+      "conditions": "Device state: not compliant/not hybrid joined",
+      "grant_controls": "Use app-enforced restrictions; sign-in frequency; persistent browser session = never",
+      "why_it_matters": "Lets you allow access from personal/unmanaged devices for convenience without leaving persistent, cached credentials or offline copies of sensitive data on them.",
+      "gotchas": [
+        "App-enforced restrictions only work with apps that support them (SharePoint, Exchange Online natively) — verify coverage for your app estate"
+      ]
+    },
+    {
+      "id": "guest-access-restriction",
+      "name": "Restrict Guest/External User Access",
+      "category": "External Identity",
+      "maturity_stage": 2,
+      "description": "A dedicated policy scoping guest/B2B users to a narrower set of apps and stricter controls than internal employees, rather than inheriting the general employee baseline.",
+      "conditions": "Users: guest or external users; Apps: explicitly scoped subset",
+      "grant_controls": "Require MFA; block high-risk sign-ins; may block legacy auth entirely for guests",
+      "why_it_matters": "Guest accounts are frequently under-governed — they inherit whatever default access exists rather than being deliberately scoped, and are a common blind spot in access reviews.",
+      "gotchas": [
+        "Pair with Entra cross-tenant access settings (inbound/outbound trust settings), not just CA alone, for full control over B2B collaboration"
+      ]
+    },
+    {
+      "id": "risk-based-signin",
+      "name": "Risk-Based Sign-In Policy",
+      "category": "Adaptive / Risk-Based",
+      "maturity_stage": 3,
+      "description": "Uses Identity Protection sign-in risk to require step-up authentication or block access when a sign-in looks anomalous (impossible travel, anonymous IP, unfamiliar sign-in properties).",
+      "conditions": "Sign-in risk: Medium and above",
+      "grant_controls": "Require MFA (or block, for High risk, depending on tolerance)",
+      "why_it_matters": "Moves beyond static rules to real-time behavioral signal — this is what catches a compromised credential being used from a new location even when the device and other conditions look normal.",
+      "gotchas": [
+        "Requires Entra ID P2 licensing",
+        "Tune thresholds carefully — Medium risk can be noisy in the first weeks; monitor false-positive rate before tightening further"
+      ]
+    },
+    {
+      "id": "risk-based-user",
+      "name": "User Risk Remediation Policy",
+      "category": "Adaptive / Risk-Based",
+      "maturity_stage": 3,
+      "description": "When Identity Protection flags a user as high risk (e.g. leaked credentials found in a breach corpus), forces a secure password reset before further access is allowed.",
+      "conditions": "User risk: High",
+      "grant_controls": "Require password change (self-service, with MFA required first)",
+      "why_it_matters": "Automates the highest-priority remediation step (credential reset) without waiting for manual security team intervention.",
+      "gotchas": [
+        "Requires self-service password reset (SSPR) to be enabled and configured tenant-wide, or this policy will lock users out instead of remediating them"
+      ]
+    },
+    {
+      "id": "auth-strength-phishing-resistant",
+      "name": "Phishing-Resistant Authentication Strength for Privileged Access",
+      "category": "Privileged Access",
+      "maturity_stage": 3,
+      "description": "Requires FIDO2 security keys, Windows Hello for Business, or certificate-based authentication (not just 'any MFA method') for admin role activation and other high-sensitivity access.",
+      "conditions": "Directory roles: privileged roles; or PIM role activation",
+      "grant_controls": "Require authentication strength: Phishing-resistant MFA",
+      "why_it_matters": "Standard MFA (SMS, push notification) is vulnerable to MFA fatigue attacks and real-time phishing/adversary-in-the-middle proxies. Phishing-resistant methods close that gap for the accounts that matter most.",
+      "gotchas": [
+        "Requires provisioning phishing-resistant credentials (FIDO2 keys or platform authenticators) to admins before enforcement — plan a rollout window",
+        "Have a documented break-glass/recovery path for lost hardware keys"
+      ]
+    },
+    {
+      "id": "pim-step-up",
+      "name": "PIM Role Activation Requires CA Step-Up",
+      "category": "Privileged Access",
+      "maturity_stage": 3,
+      "description": "Ties Privileged Identity Management just-in-time role activation to its own Conditional Access requirement, so activating an admin role triggers a fresh, stronger authentication challenge.",
+      "conditions": "Authentication context: role activation-linked context",
+      "grant_controls": "Require authentication strength: Phishing-resistant MFA; may also require compliant device",
+      "why_it_matters": "Standing admin access is a major risk; PIM reduces the always-on attack surface, but only if activation itself is properly gated — otherwise PIM becomes a rubber stamp.",
+      "gotchas": [
+        "Requires 'Authentication context' configured and referenced from PIM role settings, not just a normal CA app/user condition — this is a two-part setup (PIM + CA), easy to miss the CA half"
+      ]
+    },
+    {
+      "id": "cae-enable",
+      "name": "Continuous Access Evaluation",
+      "category": "Session Management",
+      "maturity_stage": 3,
+      "description": "Enables near-real-time token revocation for supported apps (Exchange Online, SharePoint, Teams, Graph) when a user is disabled, password is changed, or risk is detected — instead of waiting for token expiry.",
+      "conditions": "Tenant-wide setting (not a per-policy condition)",
+      "grant_controls": "N/A — session/token behavior setting",
+      "why_it_matters": "Without CAE, a revoked user or a high-risk session can remain valid for up to the token's lifetime (historically up to an hour or more). CAE closes that window to near-real-time.",
+      "gotchas": [
+        "Coverage depends on app/client support — verify which apps in your estate actually honor CAE before assuming full protection"
+      ]
+    },
+    {
+      "id": "global-secure-access",
+      "name": "Global Secure Access (Network-Layer Conditional Access)",
+      "category": "Zero Trust / Network",
+      "maturity_stage": 4,
+      "description": "Extends Conditional Access-style policy enforcement to network traffic (internet and private app access) via Entra Internet Access and Private Access, not just app sign-in events.",
+      "conditions": "Traffic profiles: Microsoft 365, internet access, private access",
+      "grant_controls": "Policy enforced at network layer — compliant device, risk signal, location, etc.",
+      "why_it_matters": "Traditional CA only governs the moment of sign-in to a cloud app. This extends the same policy engine to general internet-bound and private network traffic, closing the gap CA alone leaves open.",
+      "gotchas": [
+        "Newer capability — licensing and regional availability should be checked against current Microsoft documentation before planning a rollout",
+        "Requires client/agent deployment for full coverage, similar to a traditional SASE/ZTNA rollout"
+      ]
+    },
+    {
+      "id": "policy-as-code",
+      "name": "Conditional Access Policy-as-Code / Change Governance",
+      "category": "Governance",
+      "maturity_stage": 4,
+      "description": "Manages CA policy definitions in source control (via Microsoft Graph API/Terraform provider), with pull-request review, automated report-only testing, and rollback capability, rather than manual portal changes.",
+      "conditions": "N/A — process/tooling control",
+      "grant_controls": "N/A",
+      "why_it_matters": "Manual portal-only changes are hard to audit, easy to make inconsistently, and have no built-in rollback. Treating CA policy like infrastructure-as-code brings the same rigor software changes get.",
+      "gotchas": [
+        "Requires a documented exception process for genuinely urgent manual changes (e.g. active incident response) that bypass normal review — otherwise the process gets circumvented under pressure"
+      ]
+    },
+    {
+      "id": "mfa-registration-enforcement",
+      "name": "Enforce MFA Registration Within Grace Period",
+      "category": "Baseline Protection",
+      "maturity_stage": 1,
+      "description": "Requires users to register for MFA within a defined grace period after account creation (via Entra's MFA registration campaign / registration policy), rather than leaving registration optional until first prompted.",
+      "conditions": "All users not yet registered for MFA; typically paired with Identity Protection's registration campaign feature",
+      "grant_controls": "Require MFA registration before further access is granted, after grace period expires",
+      "why_it_matters": "An account with MFA required but not yet registered is often still accessible via legacy fallback or is simply blocked in a way that generates help-desk load. Proactively enforcing registration closes the gap between 'policy says MFA required' and 'user actually has a working MFA method.'",
+      "gotchas": [
+        "Set a reasonable grace period (e.g. 14 days) and communicate it — a zero-day enforcement will lock out new hires immediately"
+      ]
+    },
+    {
+      "id": "block-unsupported-platforms",
+      "name": "Block Unsupported Device Platforms",
+      "category": "Device & App Tiering",
+      "maturity_stage": 1,
+      "description": "Blocks sign-in from device platforms the organization does not officially support or manage (e.g. Linux desktop, or any platform outside an explicit allow-list), reducing the attack surface to known, manageable device types.",
+      "conditions": "Device platforms: any platform not in the supported list",
+      "grant_controls": "Block access",
+      "why_it_matters": "Unsupported platforms usually can't be enrolled in compliance/MDM, so they're an automatic blind spot. Blocking them by default (with an exception process) is simpler than trying to secure something you can't manage.",
+      "gotchas": [
+        "Check for legitimate existing use (developers on Linux, for example) before blocking — build an exception group rather than breaking real workflows"
+      ]
+    },
+    {
+      "id": "app-protection-policy-mam",
+      "name": "Require App Protection Policy (MAM) for Unmanaged Mobile",
+      "category": "Device & App Tiering",
+      "maturity_stage": 2,
+      "description": "For mobile access from personal/BYOD devices that aren't (and won't be) enrolled in full device management, requires an Intune App Protection Policy — containerizing corporate data within managed apps (Outlook, Teams, etc.) with copy/paste and save-location restrictions — instead of requiring full device compliance.",
+      "conditions": "Client apps: mobile apps; Device state: not compliant/not hybrid joined",
+      "grant_controls": "Require app protection policy",
+      "why_it_matters": "Full device compliance is often unrealistic for BYOD (privacy concerns, unwillingness to enroll personal devices). MAM gives meaningful data protection without requiring the user to hand over device control — usually a better adoption outcome than a hard device-compliance requirement.",
+      "gotchas": [
+        "MAM and full device compliance are different controls — decide which applies per app/user population rather than defaulting to the stricter one everywhere and generating friction"
+      ]
+    },
+    {
+      "id": "azure-management-protection",
+      "name": "Stricter Policy for Azure Management (Portal/CLI/PowerShell)",
+      "category": "Privileged Access",
+      "maturity_stage": 2,
+      "description": "A dedicated Conditional Access policy targeting the 'Microsoft Azure Management' cloud app specifically, with tighter controls (compliant device + MFA, or stronger) than the general app baseline.",
+      "conditions": "Target resource: Microsoft Azure Management (covers portal, Azure CLI, Azure PowerShell, ARM API)",
+      "grant_controls": "Require compliant device AND multi-factor authentication",
+      "why_it_matters": "Azure Management access is one of the most commonly under-protected high-value targets — it's easy to protect Microsoft 365 apps and forget that anyone with a valid credential can otherwise reach the Azure control plane directly via CLI/PowerShell/API, bypassing whatever extra scrutiny is applied to the portal UI alone.",
+      "gotchas": [
+        "This single target resource covers all management surfaces (portal, CLI, PowerShell, REST API) — don't assume protecting the portal UI alone is sufficient"
+      ]
+    },
+    {
+      "id": "terms-of-use",
+      "name": "Terms of Use Acceptance Policy",
+      "category": "Governance",
+      "maturity_stage": 2,
+      "description": "Requires explicit acceptance of a Terms of Use document (acceptable use policy, data handling agreement, etc.) before first access is granted, tracked with a timestamped audit trail.",
+      "conditions": "New users, or all users on a periodic re-acceptance cycle; often scoped heavily to guest/external users",
+      "grant_controls": "Require Terms of Use",
+      "why_it_matters": "Provides a documented, auditable acceptance record for compliance/legal purposes — particularly important for guest and contractor access where a formal acceptance trail may be a contractual or regulatory requirement.",
+      "gotchas": [
+        "Keep the ToU document itself under version control and re-trigger acceptance when it materially changes"
+      ]
+    },
+    {
+      "id": "workload-identity-ca",
+      "name": "Conditional Access for Workload Identities",
+      "category": "Adaptive / Risk-Based",
+      "maturity_stage": 3,
+      "description": "Extends Conditional Access to service principals and managed identities (workload identities), not just human users — e.g. restricting a service principal to sign in only from expected IP ranges, or blocking it if Identity Protection flags workload identity risk.",
+      "conditions": "Workload identities: specific service principals; Location/risk conditions as applicable",
+      "grant_controls": "Block access outside expected conditions",
+      "why_it_matters": "Service principals and managed identities are frequently over-privileged and under-monitored compared to human accounts, and are an increasingly common target since they often bypass MFA entirely by design. This closes a gap most tenants leave fully open.",
+      "gotchas": [
+        "Requires Entra ID P2 (Workload Identities Premium) and careful scoping — test thoroughly in report-only mode, since breaking a service principal's access can silently break automation/integrations with no user-facing error to alert anyone"
+      ]
+    },
+    {
+      "id": "token-protection",
+      "name": "Token Protection (Device-Bound Tokens)",
+      "category": "Session Management",
+      "maturity_stage": 3,
+      "description": "Binds sign-in tokens to the specific device they were issued to for supported apps (primarily Exchange Online, SharePoint Online), so a stolen token cannot be replayed from a different device.",
+      "conditions": "Target apps: Exchange Online, SharePoint Online (current supported set)",
+      "grant_controls": "Require token protection (session control)",
+      "why_it_matters": "Directly mitigates token theft/replay attacks (e.g. via adversary-in-the-middle phishing proxies or infostealer malware) — even a fully MFA-satisfied token is useless if exfiltrated to an attacker's machine.",
+      "gotchas": [
+        "Supported app/client coverage is still expanding — verify current supported apps and client versions against Microsoft documentation before assuming full coverage"
+      ]
+    },
+    {
+      "id": "cross-tenant-access-enforcement",
+      "name": "Cross-Tenant Access Settings Enforcement",
+      "category": "External Identity",
+      "maturity_stage": 4,
+      "description": "Explicitly configures inbound and outbound cross-tenant access settings (which external Entra tenants are trusted for B2B collaboration, and under what MFA/device conditions), governed with the same rigor as internal CA policy rather than left at default trust-everyone settings.",
+      "conditions": "N/A — tenant-level trust settings, complements rather than replaces CA policy",
+      "grant_controls": "Trust settings: require MFA/compliant device claims from the external tenant, or restrict to an explicit allow-list of trusted partner tenants",
+      "why_it_matters": "Default cross-tenant settings are permissive; without explicit governance, B2B collaboration can quietly become a much larger trust boundary than intended.",
+      "gotchas": [
+        "This lives in a separate settings area (Cross-tenant access settings) from standard CA policies — easy to overlook because it isn't in the Conditional Access blade"
+      ]
+    },
+    {
+      "id": "defender-cloud-apps-session-control",
+      "name": "Real-Time Session Control via Defender for Cloud Apps",
+      "category": "Zero Trust / Network",
+      "maturity_stage": 4,
+      "description": "Routes sessions for specified apps through Microsoft Defender for Cloud Apps' reverse proxy (Conditional Access App Control), enabling real-time monitoring, DLP (block download/copy/print of sensitive content), and session recording for unmanaged-device access.",
+      "conditions": "Session control: use Conditional Access App Control",
+      "grant_controls": "Monitor/restrict in real time based on content sensitivity labels and user actions within the session",
+      "why_it_matters": "Goes beyond allow/block at sign-in to active, real-time control of what a user does within a session — e.g. allowing read-only access to sensitive data from an unmanaged device while blocking download, rather than a blunt all-or-nothing decision.",
+      "gotchas": [
+        "Requires Microsoft Defender for Cloud Apps licensing and per-app onboarding to the reverse proxy — not automatic for every SaaS app"
+      ]
+    },
+    {
+      "id": "insider-risk-signal",
+      "name": "Insider Risk-Based Access Control",
+      "category": "Adaptive / Risk-Based",
+      "maturity_stage": 4,
+      "description": "Feeds Microsoft Purview Insider Risk Management signals into Conditional Access, so a user flagged for insider risk (e.g. data exfiltration indicators, departing employee with elevated risk) automatically faces stricter access controls.",
+      "conditions": "Insider risk level: elevated/high (via Purview integration)",
+      "grant_controls": "Require MFA, block download via session control, or block access entirely depending on severity",
+      "why_it_matters": "Extends adaptive access control beyond external threat signals (Identity Protection) to internal/behavioral risk — closes a gap most CA implementations never address, since CA is usually framed purely around external attackers.",
+      "gotchas": [
+        "Requires Microsoft Purview Insider Risk Management configured and populated with policies first — this is an organizational/HR-process-sensitive rollout, not just a technical toggle"
+      ]
+    },
+    {
+      "id": "agent-approved-access",
+      "name": "Restrict Resource Access to Approved Agent Identities",
+      "category": "Agentic Identity",
+      "maturity_stage": 4,
+      "description": "Blocks autonomous agent identities unless the agent or its blueprint has been reviewed and approved.",
+      "conditions": "All agent identities; exclude approved agents or blueprints directly or by custom security attribute",
+      "grant_controls": "Block access",
+      "why_it_matters": "Agent identities request tokens without an interactive user. An approval boundary prevents unreviewed agents from receiving organizational access by default.",
+      "gotchas": ["Requires eligible Entra and Agent 365 licensing", "Start in report-only mode and validate Microsoft-managed product agents"]
+    },
+    {
+      "id": "agent-risk-block",
+      "name": "Block High-Risk Agent Identities",
+      "category": "Agentic Identity",
+      "maturity_stage": 4,
+      "description": "Blocks token issuance when Entra ID Protection identifies an agent identity as high risk.",
+      "conditions": "All agent identities; agent risk: high; intended resources",
+      "grant_controls": "Block access",
+      "why_it_matters": "Risk detection without enforcement can continue issuing tokens to a compromised agent.",
+      "gotchas": ["Agent risk is a preview capability", "Agent identities cannot perform interactive MFA remediation"]
+    },
+    {
+      "id": "agent-obo-access",
+      "name": "Protect Agent Access on Behalf of Users",
+      "category": "Agentic Identity",
+      "maturity_stage": 4,
+      "description": "Applies user-scoped Conditional Access requirements when an agent exchanges a delegated user token for downstream access.",
+      "conditions": "Users and groups; downstream resources used by agents; application or agent context where supported",
+      "grant_controls": "Require appropriate authentication strength, device, network, or session controls",
+      "why_it_matters": "In an on-behalf-of flow the user is the token subject, so agent-identity-only policies do not protect the access path.",
+      "gotchas": ["Do not combine autonomous and on-behalf-of access into one assumed scope", "Conditional Access cannot govern direct API-key authentication outside Entra token issuance"]
+    }
+  ]
+}

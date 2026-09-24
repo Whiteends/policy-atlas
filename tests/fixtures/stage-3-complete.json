@@ -1,0 +1,317 @@
+﻿{
+    "schemaVersion":  "1.0.0",
+    "scriptVersion":  "0.2.0",
+    "modelVersion":  "1.0.0",
+    "policyLibraryVersion":  "1.0.0",
+    "generatedAt":  "2026-09-21T12:00:00.0000000Z",
+    "tenant":  {
+                   "fingerprint":  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                   "cloud":  "Global"
+               },
+    "collector":  {
+                      "powerShellVersion":  "7.5.0",
+                      "graphSdkVersion":  "2.0.0",
+                      "apiVersion":  "v1.0"
+                  },
+    "context":  {
+                    "policyCount":  0,
+                    "enabledPolicyCount":  0,
+                    "reportOnlyPolicyCount":  0,
+                    "licensing":  {
+                                      "hasEntraP1":  false,
+                                      "hasEntraP2":  false
+                                  },
+                    "signInActivity":  {
+                                           "requested":  false,
+                                           "legacyAuthSignInsLast7Days":  null
+                                       }
+                },
+    "assessment":  {
+                       "stage":  3,
+                       "provisionalStage":  3,
+                       "confidence":  0.79,
+                       "confidenceLabel":  "moderate",
+                       "stageResults":  {
+                                            "1":  {
+                                                      "stage":  1,
+                                                      "requiredCount":  6,
+                                                      "applicableCount":  6,
+                                                      "detectedCount":  6,
+                                                      "coveragePercent":  100,
+                                                      "confirmed":  true,
+                                                      "provisional":  true,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+
+                                                                     ],
+                                                      "failedCritical":  [
+
+                                                                         ]
+                                                  },
+                                            "2":  {
+                                                      "stage":  2,
+                                                      "requiredCount":  6,
+                                                      "applicableCount":  6,
+                                                      "detectedCount":  6,
+                                                      "coveragePercent":  100,
+                                                      "confirmed":  true,
+                                                      "provisional":  true,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+
+                                                                     ],
+                                                      "failedCritical":  [
+
+                                                                         ]
+                                                  },
+                                            "3":  {
+                                                      "stage":  3,
+                                                      "requiredCount":  7,
+                                                      "applicableCount":  7,
+                                                      "detectedCount":  7,
+                                                      "coveragePercent":  100,
+                                                      "confirmed":  true,
+                                                      "provisional":  true,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+
+                                                                     ],
+                                                      "failedCritical":  [
+
+                                                                         ]
+                                                  },
+                                            "4":  {
+                                                      "stage":  4,
+                                                      "requiredCount":  5,
+                                                      "applicableCount":  5,
+                                                      "detectedCount":  0,
+                                                      "coveragePercent":  0,
+                                                      "confirmed":  false,
+                                                      "provisional":  false,
+                                                      "missing":  [
+
+                                                                  ],
+                                                      "unresolved":  [
+                                                                         "cross-tenant-access-enforcement",
+                                                                         "global-secure-access",
+                                                                         "defender-cloud-apps-session-control",
+                                                                         "insider-risk-signal",
+                                                                         "policy-as-code"
+                                                                     ],
+                                                      "failedCritical":  [
+                                                                             "cross-tenant-access-enforcement",
+                                                                             "policy-as-code"
+                                                                         ]
+                                                  }
+                                        }
+                   },
+    "signals":  {
+                    "block-legacy-auth":  {
+                                              "status":  "detected",
+                                              "reason":  "Fixture \u0027stage-3-complete\u0027 sets block-legacy-auth to detected.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                          },
+                    "mfa-all-users":  {
+                                          "status":  "detected",
+                                          "reason":  "Fixture \u0027stage-3-complete\u0027 sets mfa-all-users to detected.",
+                                          "evidence":  [
+
+                                                       ],
+                                          "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                      },
+                    "mfa-admins-strict":  {
+                                              "status":  "detected",
+                                              "reason":  "Fixture \u0027stage-3-complete\u0027 sets mfa-admins-strict to detected.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                          },
+                    "break-glass-exclusion":  {
+                                                  "status":  "detected",
+                                                  "reason":  "Fixture \u0027stage-3-complete\u0027 sets break-glass-exclusion to detected.",
+                                                  "evidence":  [
+
+                                                               ],
+                                                  "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                              },
+                    "mfa-registration-enforcement":  {
+                                                         "status":  "detected",
+                                                         "reason":  "Fixture \u0027stage-3-complete\u0027 sets mfa-registration-enforcement to detected.",
+                                                         "evidence":  [
+
+                                                                      ],
+                                                         "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                     },
+                    "block-unsupported-platforms":  {
+                                                        "status":  "detected",
+                                                        "reason":  "Fixture \u0027stage-3-complete\u0027 sets block-unsupported-platforms to detected.",
+                                                        "evidence":  [
+
+                                                                     ],
+                                                        "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                    },
+                    "device-compliance-sensitive-apps":  {
+                                                             "status":  "detected",
+                                                             "reason":  "Fixture \u0027stage-3-complete\u0027 sets device-compliance-sensitive-apps to detected.",
+                                                             "evidence":  [
+
+                                                                          ],
+                                                             "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                         },
+                    "session-controls-unmanaged":  {
+                                                       "status":  "detected",
+                                                       "reason":  "Fixture \u0027stage-3-complete\u0027 sets session-controls-unmanaged to detected.",
+                                                       "evidence":  [
+
+                                                                    ],
+                                                       "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                   },
+                    "guest-access-restriction":  {
+                                                     "status":  "detected",
+                                                     "reason":  "Fixture \u0027stage-3-complete\u0027 sets guest-access-restriction to detected.",
+                                                     "evidence":  [
+
+                                                                  ],
+                                                     "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                 },
+                    "app-protection-policy-mam":  {
+                                                      "status":  "detected",
+                                                      "reason":  "Fixture \u0027stage-3-complete\u0027 sets app-protection-policy-mam to detected.",
+                                                      "evidence":  [
+
+                                                                   ],
+                                                      "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                  },
+                    "azure-management-protection":  {
+                                                        "status":  "detected",
+                                                        "reason":  "Fixture \u0027stage-3-complete\u0027 sets azure-management-protection to detected.",
+                                                        "evidence":  [
+
+                                                                     ],
+                                                        "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                    },
+                    "terms-of-use":  {
+                                         "status":  "detected",
+                                         "reason":  "Fixture \u0027stage-3-complete\u0027 sets terms-of-use to detected.",
+                                         "evidence":  [
+
+                                                      ],
+                                         "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                     },
+                    "risk-based-signin":  {
+                                              "status":  "detected",
+                                              "reason":  "Fixture \u0027stage-3-complete\u0027 sets risk-based-signin to detected.",
+                                              "evidence":  [
+
+                                                           ],
+                                              "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                          },
+                    "risk-based-user":  {
+                                            "status":  "detected",
+                                            "reason":  "Fixture \u0027stage-3-complete\u0027 sets risk-based-user to detected.",
+                                            "evidence":  [
+
+                                                         ],
+                                            "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                        },
+                    "auth-strength-phishing-resistant":  {
+                                                             "status":  "detected",
+                                                             "reason":  "Fixture \u0027stage-3-complete\u0027 sets auth-strength-phishing-resistant to detected.",
+                                                             "evidence":  [
+
+                                                                          ],
+                                                             "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                         },
+                    "pim-step-up":  {
+                                        "status":  "detected",
+                                        "reason":  "Fixture \u0027stage-3-complete\u0027 sets pim-step-up to detected.",
+                                        "evidence":  [
+
+                                                     ],
+                                        "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                    },
+                    "cae-enable":  {
+                                       "status":  "detected",
+                                       "reason":  "Fixture \u0027stage-3-complete\u0027 sets cae-enable to detected.",
+                                       "evidence":  [
+
+                                                    ],
+                                       "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                   },
+                    "workload-identity-ca":  {
+                                                 "status":  "detected",
+                                                 "reason":  "Fixture \u0027stage-3-complete\u0027 sets workload-identity-ca to detected.",
+                                                 "evidence":  [
+
+                                                              ],
+                                                 "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                             },
+                    "token-protection":  {
+                                             "status":  "detected",
+                                             "reason":  "Fixture \u0027stage-3-complete\u0027 sets token-protection to detected.",
+                                             "evidence":  [
+
+                                                          ],
+                                             "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                         },
+                    "cross-tenant-access-enforcement":  {
+                                                            "status":  "unknown",
+                                                            "reason":  "Fixture \u0027stage-3-complete\u0027 sets cross-tenant-access-enforcement to unknown.",
+                                                            "evidence":  [
+
+                                                                         ],
+                                                            "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                        },
+                    "global-secure-access":  {
+                                                 "status":  "unknown",
+                                                 "reason":  "Fixture \u0027stage-3-complete\u0027 sets global-secure-access to unknown.",
+                                                 "evidence":  [
+
+                                                              ],
+                                                 "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                             },
+                    "defender-cloud-apps-session-control":  {
+                                                                "status":  "unknown",
+                                                                "reason":  "Fixture \u0027stage-3-complete\u0027 sets defender-cloud-apps-session-control to unknown.",
+                                                                "evidence":  [
+
+                                                                             ],
+                                                                "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                                            },
+                    "insider-risk-signal":  {
+                                                "status":  "unknown",
+                                                "reason":  "Fixture \u0027stage-3-complete\u0027 sets insider-risk-signal to unknown.",
+                                                "evidence":  [
+
+                                                             ],
+                                                "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                            },
+                    "policy-as-code":  {
+                                           "status":  "unknown",
+                                           "reason":  "Fixture \u0027stage-3-complete\u0027 sets policy-as-code to unknown.",
+                                           "evidence":  [
+
+                                                        ],
+                                           "checkedAt":  "2026-09-22T11:43:26.6631313Z"
+                                       }
+                },
+    "manualChecks":  [
+
+                     ],
+    "warnings":  [
+
+                 ],
+    "errors":  [
+
+               ]
+}

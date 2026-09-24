@@ -1,0 +1,112 @@
+{
+  "stages": [
+    {
+      "id": 0,
+      "name": "Unmanaged",
+      "short_description": "No Conditional Access in use. Identity is protected, if at all, by Security Defaults or nothing.",
+      "typical_tenant": "Brand-new Microsoft 365/Entra tenant, or a tenant that's never had a dedicated identity/security owner. Usually SMB or a proof-of-concept environment that grew organically.",
+      "characteristics": [
+        "Either Security Defaults is on (all-or-nothing MFA for all users) or fully off",
+        "No custom Conditional Access policies exist",
+        "No break-glass/emergency access accounts",
+        "Legacy authentication protocols (POP, IMAP, SMTP AUTH, older Office clients) still allowed",
+        "No visibility into sign-in risk or device compliance"
+      ],
+      "risks_of_staying_here": [
+        "Security Defaults is rigid — can't exclude break-glass accounts, can't tune for specific apps, breaks legitimate legacy-auth workflows without warning",
+        "No protection against password-spray/credential-stuffing beyond baseline MFA",
+        "No way to differentiate risk for admins vs. regular users"
+      ],
+      "graduation_trigger": "As soon as there's a dedicated IT/security owner and more than a handful of users, move to Stage 1 — Security Defaults does not scale and cannot be selectively tuned.",
+      "estimated_effort_to_next_stage": "1-3 days for a small tenant"
+    },
+    {
+      "id": 1,
+      "name": "Foundational",
+      "short_description": "Security Defaults replaced with a small set of custom baseline policies covering the highest-value risks.",
+      "typical_tenant": "Organization with a named IT/security lead, under ~500 users, first real investment in identity security.",
+      "characteristics": [
+        "Security Defaults turned OFF, replaced by custom policies",
+        "Break-glass emergency access accounts created, excluded from all CA policies, monitored separately",
+        "MFA required for all users (not just admins)",
+        "MFA required for all admin roles specifically, ideally with a tighter/stronger control than standard users",
+        "Legacy authentication blocked tenant-wide",
+        "Basic naming convention and documentation for policies established"
+      ],
+      "risks_of_staying_here": [
+        "Still largely binary (allow/block) — no risk signal, no device posture check",
+        "No differentiation between a login from a managed corporate laptop and an unknown device",
+        "No handling of guest/external user access separate from employees"
+      ],
+      "graduation_trigger": "Once baseline MFA + legacy-auth blocking is stable (no help-desk fire drills, break-glass tested), move to Stage 2 by introducing device- and app-specific controls.",
+      "estimated_effort_to_next_stage": "2-6 weeks, mostly change-management and communication, not technical build"
+    },
+    {
+      "id": 2,
+      "name": "Standard",
+      "short_description": "Policies differentiate by application sensitivity and device compliance, not just identity.",
+      "typical_tenant": "Mid-size organization, Intune or another MDM in place, starting to care about data sensitivity per app.",
+      "characteristics": [
+        "Device compliance policies (Intune) exist and are referenced in CA — e.g. require compliant or hybrid-joined device for sensitive apps",
+        "Session controls introduced — sign-in frequency, persistent browser session restrictions for unmanaged devices",
+        "Separate, stricter policies for high-value apps (finance systems, HR, admin portals) vs. general SaaS",
+        "Guest/external user access explicitly scoped and restricted (not inheriting employee policies by default)",
+        "Location-based conditions in use (e.g. block or step-up MFA for atypical countries) as a coarse control",
+        "Report-only mode used before enforcing new policies",
+        "Named locations configured (trusted/corporate IP ranges) rather than relying on country alone"
+      ],
+      "risks_of_staying_here": [
+        "Still largely static rules — a compromised credential with a compliant device and normal location still gets in",
+        "No real-time risk scoring; a leaked password looks the same as a legitimate login if other signals match",
+        "Policies often accumulate without a review cadence, leading to overlap or conflict"
+      ],
+      "graduation_trigger": "Once device compliance and app-tiering are stable and report-only testing is a routine part of the change process, move to Stage 3 by adding Identity Protection risk signals.",
+      "estimated_effort_to_next_stage": "1-3 months, needs Entra ID P2 licensing for Identity Protection"
+    },
+    {
+      "id": 3,
+      "name": "Advanced",
+      "short_description": "Risk-based, adaptive policies using Identity Protection sign-in and user risk signals.",
+      "typical_tenant": "Larger organization or one in a regulated industry, has Entra ID P2, dedicated identity/security team.",
+      "characteristics": [
+        "Identity Protection enabled — user risk and sign-in risk feed directly into CA policies",
+        "Risk-based policies: e.g. medium sign-in risk triggers MFA step-up, high user risk forces password reset or blocks access",
+        "Authentication strengths configured — phishing-resistant methods (FIDO2/passkeys, certificate-based auth) required for high-sensitivity access, not just 'any MFA'",
+        "Privileged Identity Management (PIM) integrated with CA — just-in-time admin role activation requires its own CA-enforced step-up",
+        "Continuous Access Evaluation (CAE) enabled for supported apps — near-real-time token revocation on risk/location change, not just at sign-in",
+        "Terms of Use and Insider Risk signals incorporated where relevant",
+        "Regular access reviews tied to policy exclusions and admin role assignments",
+        "Formal policy governance: change process, testing in report-only, rollback plan, periodic audit of exclusions"
+      ],
+      "risks_of_staying_here": [
+        "Coverage may still be inconsistent across all app types, especially legacy/on-prem-integrated apps",
+        "Cross-tenant and B2B/B2C scenarios often lag behind the core employee policy set",
+        "Network-layer control (what happens after token issuance, for unmanaged internet-bound traffic) usually still a gap"
+      ],
+      "graduation_trigger": "Once risk-based policies and phishing-resistant auth are the default for privileged access, and CAE is broadly deployed, move to Stage 4 by extending control to network/session layer and cross-tenant scenarios.",
+      "estimated_effort_to_next_stage": "3-6+ months, organizational maturity as much as technical"
+    },
+    {
+      "id": 4,
+      "name": "Optimized / Zero Trust",
+      "short_description": "Conditional Access is one layer of a fully integrated Zero Trust control plane spanning identity, device, network, and app layers.",
+      "typical_tenant": "Enterprise with mature security program, often regulated (finance, energy, government-adjacent), dedicated Zero Trust initiative.",
+      "characteristics": [
+        "Global Secure Access (Entra Internet Access / Private Access) integrated — CA policies extend to network-layer traffic, not just app sign-in",
+        "Phishing-resistant authentication is the default baseline for all users, not just privileged ones",
+        "Continuous Access Evaluation extended across the full app estate, including custom/line-of-business apps where feasible",
+        "Cross-tenant access settings and B2B collaboration governed with the same rigor as internal CA policy",
+        "Automated policy testing/CI for CA changes — 'policy as code' via Graph API/Terraform, changes reviewed like software changes",
+        "Continuous monitoring and automated response — Sentinel/XDR signals feed back into risk policies, not just Identity Protection's own signals",
+        "Regular red-team/attack-simulation validation of CA coverage (e.g. testing token theft, session hijack scenarios against CAE)",
+        "Formal maturity review cadence — policies re-assessed against new threats and new Entra features on a fixed schedule"
+      ],
+      "risks_of_staying_here": [
+        "This stage requires ongoing investment to maintain — Zero Trust degrades quietly if governance lapses",
+        "Feature/licensing changes from Microsoft can shift what 'optimized' looks like; this stage needs a maintenance owner, not just a one-time project"
+      ],
+      "graduation_trigger": "N/A — this is a maintenance stage. Re-assess quarterly against new Entra/Zero Trust capabilities.",
+      "estimated_effort_to_next_stage": null
+    }
+  ]
+}
